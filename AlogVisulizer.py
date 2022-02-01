@@ -2,38 +2,52 @@ from tkinter import *
 from tkinter import ttk
 import random
 import time
+import time
+def merge_sort(data,drawData,timeTick):
+    merge_sort_alg(data,0,len(data)-1,drawData,timeTick)
 
-def mergesort(l,drawData,timeTick):
-    if len(l)==1:
-        return l
-    x=int(len(l)/2)    
-    l1=l[:x]
-    l2=l[x:]
+def merge_sort_alg(data,left,right,drawData,timeTick):
+    if left < right:
+        middle=(left+right)//2
+        merge_sort_alg(data,left,middle,drawData,timeTick)
+        merge_sort_alg(data,middle+1,right,drawData,timeTick)
+        merge(data,left,middle,right,drawData,timeTick)
 
-    l1=mergesort(l1,drawData,timeTick)
-    l2=mergesort(l2,drawData,timeTick)
+def merge(data,left,middle,right,darwData,timeTick):
+    drawData(data, getColorArray(len(data), left, middle, right))
+    time.sleep(timeTick)
 
-    
-    return merge(l1,l2,drawData,timeTick)
-
-def  merge(l1,l2,drawData,timeTick):
-    c=[]
-    l1=list(l1)
-    l2=list(l2)
-    while(len(l1)!=0 and len(l2)!=0):
-        if(l1[0]>l2[0]):
-            c.append(l2[0])
-            l2.pop(0)
+    leftPart= data[left: middle +1]
+    rightPart=data[middle + 1:right+1]
+    leftIdx = rightIdx =0
+    for dataIdx in range(left, right+1):
+        if leftIdx < len(leftPart) and rightIdx< len(rightPart):
+            if leftPart[leftIdx]<=rightPart[rightIdx]:
+                data[dataIdx] = leftPart[leftIdx]
+                leftIdx +=1
+            else:
+                data[dataIdx]=rightPart[rightIdx]
+                rightIdx +=1
+        elif leftIdx <len(leftPart):
+            data[dataIdx]= leftPart[leftIdx]
+            leftIdx +=1
         else:
-            c.append(l1[0])
-            l1.pop(0)
-    while (len(l1)!=0):
-        c.append(l1[0])
-        l1.pop(0)
-    while (len(l2)!=0):
-        c.append(l2[0])
-        l2.pop(0)
-    return c      
+            data[dataIdx] = rightPart[rightIdx]
+            rightIdx +=1
+    drawData(data,['green' if x>=left and x<=right else 'white' for x in range(len(data))])
+    time.sleep(timeTick)
+
+def getColorArray(length, left,middle,right):
+    colorArray=[]
+    for i in range(length):
+        if i > left and i <= right:
+            if i >= left and i <= middle:
+                colorArray.append('yellow')
+            else:
+                colorArray.append('black')
+        else:
+            colorArray.append('White')
+    return colorArray
 
 def insertion(l,drawData,timeTick):
     for i in range(len(l)):
@@ -51,11 +65,12 @@ def selectionsort(l,drawData, timeTick):
     for i in indexing:
         min_value=i
         for j in range(i+1,len(l)):
+            drawData(l, ['green' if x == j or x==min_value else 'red' for x in range(len(l))] )
             if l[j]<l[min_value]:
                 min_value=j
         if min_value !=i:
             l[min_value], l[i]=l[i], l[min_value]
-            drawData(l, ['green' if x < i  else 'red' for x in range(len(l))] )
+            
             time.sleep(timeTick)
     drawData(l, ['green' for x in range(len(l))])
 
@@ -64,7 +79,7 @@ def bubble_sort(data, drawData, timeTick):
         for j in range(len(data)-1):
             if data[j] > data[j+1]:
                 data[j], data[j+1] = data[j+1], data[j]
-                drawData(data, ['green' if x < j or x == j+1 else 'red' for x in range(len(data))] )
+                drawData(data, ['green' if x == j or x == j+1 else 'red' for x in range(len(data))] )
                 time.sleep(timeTick)
     drawData(data, ['green' for x in range(len(data))])
 
@@ -123,11 +138,9 @@ def StartAlgorithm():
     elif x=='Insertion Sort':
         insertion(data,drawData,speedScale.get())
     elif x=="Merge Sort":
-        mergesort(data,drawData,speedScale.get())    
+        merge_sort(data,drawData,speedScale.get())    
     else:
         bubble_sort(data, drawData, speedScale.get())
-
-
 
 #frame / base lauout
 UI_frame = Frame(root, width= 600, height=200, bg='grey')
