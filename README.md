@@ -22,5 +22,8 @@ To improve the performance of the application, we used default functions and red
 ## Contributing
 If you would like to contribute to the Sorting Algorithm Visualizer project, feel free to fork the repository and submit pull requests with your changes. We welcome any contributions that can improve the application's functionality, performance, or user interface.
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+https://user-images.githubusercontent.com/52993591/233472008-082f8dd4-0c2b-4713-9a11-b76f2ba98581.mp4
+
+
+
