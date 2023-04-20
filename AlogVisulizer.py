@@ -1,175 +1,241 @@
-from tkinter import *
-from tkinter import ttk
+import pygame
 import random
-import time
-import time
-def merge_sort(data,drawData,timeTick):
-    merge_sort_alg(data,0,len(data)-1,drawData,timeTick)
+import math
+pygame.init()
 
-def merge_sort_alg(data,left,right,drawData,timeTick):
-    if left < right:
-        middle=(left+right)//2
-        merge_sort_alg(data,left,middle,drawData,timeTick)
-        merge_sort_alg(data,middle+1,right,drawData,timeTick)
-        merge(data,left,middle,right,drawData,timeTick)
+class DrawInformation:
+	BLACK = 0, 0, 0
+	WHITE = 255, 255, 255
+	GREEN = 0, 255, 0
+	RED = 255, 0, 0
+	BACKGROUND_COLOR = WHITE
 
-def merge(data,left,middle,right,darwData,timeTick):
-    drawData(data, getColorArray(len(data), left, middle, right))
-    time.sleep(timeTick)
+	GRADIENTS = [
+		(128, 128, 128),
+		(160, 160, 160),
+		(192, 192, 192)
+	]
 
-    leftPart= data[left: middle +1]
-    rightPart=data[middle + 1:right+1]
-    leftIdx = rightIdx =0
-    for dataIdx in range(left, right+1):
-        if leftIdx < len(leftPart) and rightIdx< len(rightPart):
-            if leftPart[leftIdx]<=rightPart[rightIdx]:
-                data[dataIdx] = leftPart[leftIdx]
-                leftIdx +=1
-            else:
-                data[dataIdx]=rightPart[rightIdx]
-                rightIdx +=1
-        elif leftIdx <len(leftPart):
-            data[dataIdx]= leftPart[leftIdx]
-            leftIdx +=1
-        else:
-            data[dataIdx] = rightPart[rightIdx]
-            rightIdx +=1
-    drawData(data,['green' if x>=left and x<=right else 'white' for x in range(len(data))])
-    time.sleep(timeTick)
+	FONT = pygame.font.SysFont('comicsans', 30)
+	LARGE_FONT = pygame.font.SysFont('comicsans', 40)
 
-def getColorArray(length, left,middle,right):
-    colorArray=[]
-    for i in range(length):
-        if i > left and i <= right:
-            if i >= left and i <= middle:
-                colorArray.append('yellow')
-            else:
-                colorArray.append('black')
-        else:
-            colorArray.append('White')
-    return colorArray
+	SIDE_PAD = 100
+	TOP_PAD = 150
 
-def insertion(l,drawData,timeTick):
-    for i in range(len(l)):
-        j=i
-        while j>0 and l[j-1]>l[j]:
-            l[j],l[j-1]=l[j-1],l[j]
-            j=j-1
-            drawData(l, ['green' if x < i  else 'red' for x in range(len(l))] )
-            time.sleep(timeTick)
-    drawData(l, ['green' for x in range(len(l))]) 
+	def __init__(self, width, height, lst):
+		self.width = width
+		self.height = height
 
-def selectionsort(l,drawData, timeTick):
-    print('Program went here')
-    indexing=range(0,len(l)-1)
-    for i in indexing:
-        min_value=i
-        for j in range(i+1,len(l)):
-            drawData(l, ['green' if x == j or x==min_value else 'red' for x in range(len(l))] )
-            if l[j]<l[min_value]:
-                min_value=j
-        if min_value !=i:
-            l[min_value], l[i]=l[i], l[min_value]
-            
-            time.sleep(timeTick)
-    drawData(l, ['green' for x in range(len(l))])
+		self.window = pygame.display.set_mode((width, height))
+		pygame.display.set_caption("Sorting Algorithm Visualization")
+		self.set_list(lst)
 
-def bubble_sort(data, drawData, timeTick):
-    for _ in range(len(data)-1):
-        for j in range(len(data)-1):
-            if data[j] > data[j+1]:
-                data[j], data[j+1] = data[j+1], data[j]
-                drawData(data, ['green' if x == j or x == j+1 else 'red' for x in range(len(data))] )
-                time.sleep(timeTick)
-    drawData(data, ['green' for x in range(len(data))])
+	def set_list(self, lst):
+		self.lst = lst
+		self.min_val = min(lst)
+		self.max_val = max(lst)
 
-root = Tk()
-root.title('Sorting Algorithm Visualisation')
-root.maxsize(900, 600)
-root.config(bg='black')
+		self.block_width = round((self.width - self.SIDE_PAD) / len(lst))
+		self.block_height = math.floor((self.height - self.TOP_PAD) / (self.max_val - self.min_val))
+		self.start_x = self.SIDE_PAD // 2
 
-#variables
-selected_alg = StringVar()
-data = []
 
-#function
-def drawData(data, colorArray):
-    canvas.delete("all")
-    c_height = 380
-    c_width = 600
-    x_width = c_width / (len(data) + 1)
-    offset = 30
-    spacing = 10
-    normalizedData = [ i / max(data) for i in data]
-    for i, height in enumerate(normalizedData):
-        #top left
-        x0 = i * x_width + offset + spacing
-        y0 = c_height - height * 340
-        #bottom right
-        x1 = (i + 1) * x_width + offset
-        y1 = c_height
+def draw(draw_info, algo_name, ascending):
+	draw_info.window.fill(draw_info.BACKGROUND_COLOR)
 
-        canvas.create_rectangle(x0, y0, x1, y1, fill=colorArray[i])
-        canvas.create_text(x0+2, y0, anchor=SW, text=str(data[i]))
+	title = draw_info.LARGE_FONT.render(f"{algo_name} - {'Ascending' if ascending else 'Descending'}", 1, draw_info.GREEN)
+	draw_info.window.blit(title, (draw_info.width/2 - title.get_width()/2 , 5))
+
+	controls = draw_info.FONT.render("R - Reset | SPACE - Start Sorting | A - Ascending | D - Descending", 1, draw_info.BLACK)
+	draw_info.window.blit(controls, (draw_info.width/2 - controls.get_width()/2 , 45))
+
+	sorting = draw_info.FONT.render("I - Insertion Sort | B - Bubble Sort | S- Selection Sort | Q- Quick Sort", 1, draw_info.BLACK)
+	draw_info.window.blit(sorting, (draw_info.width/2 - sorting.get_width()/2 , 75))
+
+	draw_list(draw_info)
+	pygame.display.update()
+
+
+def draw_list(draw_info, color_positions={}, clear_bg=False):
+	lst = draw_info.lst
+
+	if clear_bg:
+		clear_rect = (draw_info.SIDE_PAD//2, draw_info.TOP_PAD, 
+						draw_info.width - draw_info.SIDE_PAD, draw_info.height - draw_info.TOP_PAD)
+		pygame.draw.rect(draw_info.window, draw_info.BACKGROUND_COLOR, clear_rect)
+
+	for i, val in enumerate(lst):
+		x = draw_info.start_x + i * draw_info.block_width
+		y = draw_info.height - (val - draw_info.min_val) * draw_info.block_height
+
+		color = draw_info.GRADIENTS[i % 3]
+
+		if i in color_positions:
+			color = color_positions[i] 
+
+		pygame.draw.rect(draw_info.window, color, (x, y, draw_info.block_width, draw_info.height))
+
+	if clear_bg:
+		pygame.display.update()
+
+
+def generate_starting_list(n, min_val, max_val):
+	lst = []
+
+	for _ in range(n):
+		val = random.randint(min_val, max_val)
+		lst.append(val)
+
+	return lst
+
+
+def bubble_sort(draw_info, ascending=True):
+	lst = draw_info.lst
+
+	for i in range(len(lst) - 1):
+		for j in range(len(lst) - 1 - i):
+			num1 = lst[j]
+			num2 = lst[j + 1]
+
+			if (num1 > num2 and ascending) or (num1 < num2 and not ascending):
+				lst[j], lst[j + 1] = lst[j + 1], lst[j]
+				draw_list(draw_info, {j: draw_info.GREEN, j + 1: draw_info.RED}, True)
+				yield True
+
+	return lst
+
+
+def selection_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    n = len(lst)
     
-    root.update_idletasks()
+    for i in range(n-1):
+        min_idx = i
+        
+        for j in range(i+1, n):
+            if (lst[j] < lst[min_idx] and ascending) or (lst[j] > lst[min_idx] and not ascending):
+                min_idx = j
+        
+        lst[i], lst[min_idx] = lst[min_idx], lst[i]
+        draw_list(draw_info, {i: draw_info.GREEN, min_idx: draw_info.RED}, True)
+        yield True
+    return lst
+
+def quick_sort(draw_info, ascending=True):
+    lst = draw_info.lst
+    
+    def partition(start, end):
+        pivot = lst[end]
+        i = start - 1
+        
+        for j in range(start, end):
+            if (lst[j] < pivot and ascending) or (lst[j] > pivot and not ascending):
+                i += 1
+                lst[i], lst[j] = lst[j], lst[i]
+                draw_list(draw_info, {i: draw_info.GREEN, j: draw_info.RED}, True)
+                yield True
+        
+        lst[i+1], lst[end] = lst[end], lst[i+1]
+        draw_list(draw_info, {i+1: draw_info.GREEN, end: draw_info.RED}, True)
+        yield True
+        
+        return i+1
+    
+    def quick_sort_helper(start, end):
+        if start < end:
+            p = yield from partition(start, end)
+            
+            yield from quick_sort_helper(start, p-1)
+            yield from quick_sort_helper(p+1, end)
+    
+    yield from quick_sort_helper(0, len(lst)-1)
+    
+    return lst
 
 
-def Generate():
-    global data
-    #print(selected_alg.get())
+def insertion_sort(draw_info, ascending=True):
+	lst = draw_info.lst
 
-    minVal = int(minEntry.get())
-    maxVal = int(maxEntry.get())
-    size = int(sizeEntry.get())
+	for i in range(1, len(lst)):
+		current = lst[i]
 
-    data = []
-    for _ in range(size):
-        data.append(random.randrange(minVal, maxVal+1))
+		while True:
+			ascending_sort = i > 0 and lst[i - 1] > current and ascending
+			descending_sort = i > 0 and lst[i - 1] < current and not ascending
 
-    drawData(data, ['red' for x in range(len(data))]) #['red', 'red' ,....]
+			if not ascending_sort and not descending_sort:
+				break
 
-def StartAlgorithm():
-    global data
-    x=selected_alg.get()
-    print(x)
-    if x=='Selection Sort':
-        selectionsort(data,drawData,speedScale.get())
-    elif x=='Insertion Sort':
-        insertion(data,drawData,speedScale.get())
-    elif x=="Merge Sort":
-        merge_sort(data,drawData,speedScale.get())    
-    else:
-        bubble_sort(data, drawData, speedScale.get())
+			lst[i] = lst[i - 1]
+			i = i - 1
+			lst[i] = current
+			draw_list(draw_info, {i - 1: draw_info.GREEN, i: draw_info.RED}, True)
+			yield True
 
-#frame / base lauout
-UI_frame = Frame(root, width= 600, height=200, bg='grey')
-UI_frame.grid(row=0, column=0, padx=10, pady=5)
+	return lst
 
-canvas = Canvas(root, width=600, height=380, bg='white')
-canvas.grid(row=1, column=0, padx=10, pady=5)
 
-#User Interface Area
-#Row[0]
-Label(UI_frame, text="Algorithm: ", bg='grey').grid(row=0, column=0, padx=5, pady=5, sticky=W)
-algMenu = ttk.Combobox(UI_frame, textvariable=selected_alg, values=['Bubble Sort', 'Insertion Sort','Selection Sort','Merge Sort'])
-algMenu.grid(row=0, column=1, padx=5, pady=5)
-algMenu.current(0)
+def main():
+	run = True
+	clock = pygame.time.Clock()
 
-speedScale = Scale(UI_frame, from_=0.1, to=2.0, length=200, digits=2, resolution=0.2, orient=HORIZONTAL, label="Select Speed [s]")
-speedScale.grid(row=0, column=2, padx=5, pady=5)
-Button(UI_frame, text="Start", command=StartAlgorithm, bg='red').grid(row=0, column=3, padx=5, pady=5)
+	n = 50
+	min_val = 0
+	max_val = 100
 
-#Row[1]
-sizeEntry = Scale(UI_frame, from_=3, to=25, resolution=1, orient=HORIZONTAL, label="Data Size")
-sizeEntry.grid(row=1, column=0, padx=5, pady=5)
+	lst = generate_starting_list(n, min_val, max_val)
+	draw_info = DrawInformation(1000, 800, lst)
+	sorting = False
+	ascending = True
 
-minEntry = Scale(UI_frame, from_=0, to=10, resolution=1, orient=HORIZONTAL, label="Min Value")
-minEntry.grid(row=1, column=1, padx=5, pady=5)
+	sorting_algorithm = bubble_sort
+	sorting_algo_name = "Bubble Sort"
+	sorting_algorithm_generator = None
 
-maxEntry = Scale(UI_frame, from_=10, to=100, resolution=1, orient=HORIZONTAL, label="Max Value")
-maxEntry.grid(row=1, column=2, padx=5, pady=5)
+	while run:
+		clock.tick(10)
 
-Button(UI_frame, text="Generate", command=Generate, bg='white').grid(row=1, column=3, padx=5, pady=5)
+		if sorting:
+			try:
+				next(sorting_algorithm_generator)
+			except StopIteration:
+				sorting = False
+		else:
+			draw(draw_info, sorting_algo_name, ascending)
 
-root.mainloop()
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
+
+			if event.type != pygame.KEYDOWN:
+				continue
+
+			if event.key == pygame.K_r:
+				lst = generate_starting_list(n, min_val, max_val)
+				draw_info.set_list(lst)
+				sorting = False
+			elif event.key == pygame.K_SPACE and sorting == False:
+				sorting = True
+				sorting_algorithm_generator = sorting_algorithm(draw_info, ascending)
+			elif event.key == pygame.K_a and not sorting:
+				ascending = True
+			elif event.key == pygame.K_d and not sorting:
+				ascending = False
+			elif event.key == pygame.K_i and not sorting:
+				sorting_algorithm = insertion_sort
+				sorting_algo_name = "Insertion Sort"
+			elif event.key == pygame.K_b and not sorting:
+				sorting_algorithm = bubble_sort
+				sorting_algo_name = "Bubble Sort"
+			elif event.key== pygame.K_s and not sorting:
+				sorting_algorithm=selection_sort
+				sorting_algo_name="Selection Sort"
+			elif event.key== pygame.K_q and not sorting:
+				sorting_algorithm=quick_sort
+				sorting_algo_name="Quick Sort"
+
+	pygame.quit()
+
+
+if __name__ == "__main__":
+	main()
