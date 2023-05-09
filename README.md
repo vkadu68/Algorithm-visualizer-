@@ -1,3 +1,8 @@
+
+https://user-images.githubusercontent.com/52993591/233472008-082f8dd4-0c2b-4713-9a11-b76f2ba98581.mp4
+
+
+
 # Sorting Algorithm Visualizer
 This is a Python application built with the Rnter library to visualize the working of 5 different sorting algorithms: insertion sort, selection sort, merge sort, quick sort, and bubble sort. Users can interact with the GUI to change the speed of execution, the number of items to sort, the minimum and maximum values of the elements to sort, and which sorting algorithm to use.
 
@@ -21,9 +26,6 @@ To improve the performance of the application, we used default functions and red
 
 ## Contributing
 If you would like to contribute to the Sorting Algorithm Visualizer project, feel free to fork the repository and submit pull requests with your changes. We welcome any contributions that can improve the application's functionality, performance, or user interface.
-
-
-https://user-images.githubusercontent.com/52993591/233472008-082f8dd4-0c2b-4713-9a11-b76f2ba98581.mp4
 
 
 
